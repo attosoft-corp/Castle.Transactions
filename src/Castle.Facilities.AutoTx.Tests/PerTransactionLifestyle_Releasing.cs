@@ -121,30 +121,52 @@ namespace Castle.Facilities.AutoTx.Tests
 		{
 			// given
 			var container = GetContainer();
+
+			var createdTx2TaskCompletition = new TaskCompletionSource<ICreatedTransaction>();
 			var childStartedTaskCompletition = new TaskCompletionSource<bool>();
-			Task childCompleteTask;
 
 			// exports from actions, to assert end-state
-			IPerTxService serviceUsed;
-
-			// when
+			IPerTxService serviceUsed = null;
+			Guid parentId = Guid.Empty;
 			Exception possibleException = null;
-			using (var scope = container.ResolveScope<Service>())
-			using (var manager = container.ResolveScope<ITransactionManager>())
-			using (var tx = manager.Service.CreateTransaction().Value.Transaction)
+
+			var parentTask = Task.Run(async () =>
 			{
-				var resolved = scope.Service.DoWork();
-				var parentId = resolved.Id;
+				using (var scope = container.ResolveScope<Service>())
+				using (var manager = container.ResolveScope<ITransactionManager>())
+				using (var tx = manager.Service.CreateTransaction().Value.Transaction)
+				{
+					var resolved = scope.Service.DoWork();
+					parentId = resolved.Id;
 
-				// create a child transaction
-				var createdTx2 = manager.Service.CreateTransaction(new DefaultTransactionOptions { Fork = true }).Value;
+					// create a child transaction
+					var createdTx2 = manager.Service.CreateTransaction(new DefaultTransactionOptions { Fork = true }).Value;
 
-				Assert.That(createdTx2.ShouldFork, Is.True, "because we're in an ambient and have specified the option");
-				Assert.That(manager.Service.Count, Is.EqualTo(1), "transaction count correct");
+					Assert.That(createdTx2.ShouldFork, Is.True, "because we're in an ambient and have specified the option");
+					Assert.That(manager.Service.Count, Is.EqualTo(1), "transaction count correct");
 
-				childCompleteTask = Task.Run(() =>
+					// notify waiting child task that can continue execution with createdTx2 value
+					createdTx2TaskCompletition.SetResult(createdTx2);
+					
+					await childStartedTaskCompletition.Task.ConfigureAwait(false);
+
+					serviceUsed = resolved;
+
+					Assert.That(resolved.Disposed, Is.False, "the item should be disposed at the completion of the tx");
+
+					tx.Complete();
+
+					Assert.That(resolved.Disposed, "the item should be disposed at the completion of the tx");
+				}
+			});
+
+			var childTask = Task.Run(async () =>
+			{
+				using (var scope = container.ResolveScope<Service>())
+				using (var manager = container.ResolveScope<ITransactionManager>())
 				{
 					IPerTxService perTxService;
+					var createdTx2 = await createdTx2TaskCompletition.Task;
 
 					try
 					{
@@ -177,21 +199,14 @@ namespace Castle.Facilities.AutoTx.Tests
 					{
 						logger.Debug("child finally");
 					}
-				});
-				await childStartedTaskCompletition.Task.ConfigureAwait(false);
-
-				serviceUsed = resolved;
-
-				Assert.That(resolved.Disposed, Is.False, "the item should be disposed at the completion of the tx");
-
-				tx.Complete();
-
-				Assert.That(resolved.Disposed, "the item should be disposed at the completion of the tx");
-			}
-
+				};
+			});
+			
+			await parentTask.ConfigureAwait(false);
+			
 			Assert.That(serviceUsed.Disposed, Is.True);
 
-			await childCompleteTask.ConfigureAwait(false);
+			await childTask.ConfigureAwait(false);
 
 			// throw any thread exceptions
 			if (possibleException != null)
