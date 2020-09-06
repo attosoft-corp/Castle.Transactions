@@ -1,52 +1,113 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BBDD1C0A-67E9-48C7-9A14-69CB8B158549}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Castle.Facilities.AutoTx.Tests</RootNamespace>
     <AssemblyName>Castle.Facilities.AutoTx.Tests</AssemblyName>
-    <PackageId>Castle.Facilities.AutoTx.Tests</PackageId>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET40-Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'NET40-Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\buildscripts\CastleKey.snk</AssemblyOriginatorKeyFile>
-    <Version>3.3.0</Version>
-    <Product>Castle AutoTx Facility</Product>
-    <Description>This facility enables ambient easy-to-use declarative transactions through the [Transaction] attribute. This is the glue that holds the bits and pieces from Castle Transactions together and the stuff that will make your co-workers googly-eyed and impressed.</Description>
-    <Copyright>Apache 2.0 Licensed. (c) The Castle Project 2004-2011</Copyright>
-    <Authors>Henrik Feldt</Authors>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/castleproject/Castle.Transactions</PackageProjectUrl>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\buildscripts\TestAssemblyInfo.cs" Link="TestAssemblyInfo.cs" />
+    <Reference Include="Castle.Core, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\net40\Castle.Core.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Castle.Windsor, Version=2.5.1.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\net40\Castle.Windsor.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\log4net.1.2.10\lib\2.0\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpTestsEx, Version=1.2.1.0, Culture=neutral, PublicKeyToken=8c60d8070630b1c1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SharpTestsEx.1.2.1\lib\SharpTestsEx.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Transactions" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\AutoTxAssemblyInfo.cs">
+      <Link>Properties\AutoTxAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="AsyncCalls.cs" />
+    <Compile Include="Properties\InternalsVisibleTo.cs" />
+    <Compile Include="Bugfixes\MissingTransactionException_when_generically_parametized_interface_service_in_error.cs" />
+    <Compile Include="Framework\MaybeEx.cs" />
+    <Compile Include="HandlerSelector_ForDifferentLifestyles.cs" />
+    <Compile Include="InitTests.cs" />
+    <Compile Include="MultipleThreads_TransactionBookKeeping.cs" />
+    <Compile Include="PerTransactionLifestyle_Releasing.cs" />
+    <Compile Include="RetryPolicies_Transactions.cs" />
+    <Compile Include="Scratch.cs" />
+    <Compile Include="SingleThread_Ambient_OnConcreteType.cs" />
+    <Compile Include="SingleThread_Ambient_OnInterface.cs" />
+    <Compile Include="SingleThread_SupressInAmbient.cs" />
+    <Compile Include="TestClasses\ConcreteService.cs" />
+    <Compile Include="TestClasses\MyService.cs" />
+    <Compile Include="TestClasses\ThrowingResource.cs" />
+    <Compile Include="TxClassMetaInfoStore_MetaData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\buildscripts\CastleKey.snk">
       <Link>CastleKey.snk</Link>
     </None>
     <None Include="App.config" />
-    <None Include="NLog.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.2.1" />
-    <PackageReference Include="Castle.Core-NLog" Version="4.2.1" />
-    <PackageReference Include="Castle.FactorySupportFacility" Version="4.1.0" />
-    <PackageReference Include="Castle.LoggingFacility" Version="4.1.0" />
-    <PackageReference Include="Castle.Windsor" Version="4.1.0" />
-    <PackageReference Include="NLog" Version="4.5.4" />
-    <PackageReference Include="NUnit" Version="3.10.1" />
-    <PackageReference Include="SharpTestsEx.MVC" Version="1.1.1" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <ProjectReference Include="..\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj">
+      <Project>{c19a20dd-8f32-44ef-9b68-43c70677f92d}</Project>
+      <Name>Castle.Facilities.AutoTx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Castle.Services.Transaction\Castle.Services.Transaction.csproj">
+      <Project>{76df5d09-fc04-411f-b123-01a6b9432796}</Project>
+      <Name>Castle.Services.Transaction</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Castle.Facilities.AutoTx\Castle.Facilities.AutoTx.csproj" />
-    <ProjectReference Include="..\Castle.Transactions\Castle.Transactions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
