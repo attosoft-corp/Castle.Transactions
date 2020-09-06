@@ -188,7 +188,7 @@ namespace Castle.Transactions
 			_HasValue = false;
 		}
 
-		public Maybe(T value)
+		internal Maybe(T value)
 		{
 			Contract.Ensures(HasValue);
 			_Value = value;

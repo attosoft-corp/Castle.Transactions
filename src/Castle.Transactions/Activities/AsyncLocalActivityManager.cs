@@ -1,77 +1,51 @@
-﻿namespace Castle.Services.Transaction.Activities
-{
-	using System;
-	using System.Configuration;
-	using System.Runtime.Remoting.Messaging;
-	using System.Threading;
-	using Core.Logging;
+﻿// Copyright 2004-2012 Castle Project, Henrik Feldt &contributors - https://github.com/castleproject
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
+using System.Threading;
+using Castle.Core.Logging;
+
+namespace Castle.Transactions.Activities
+{
 	/// <summary>
-	/// 	The call-context activity manager saves the stack of transactions
-	/// 	on the call-stack-context. This is the recommended manager and the default,
-	/// 	also.
+	///   The AsyncLocal activity manager saves the stack of transactions in async local variable. This is the recommended manager and the default, also.
 	/// </summary>
 	public class AsyncLocalActivityManager : IActivityManager
 	{
-		private const string Key = "Castle.Services.Transaction.Activity2";
-
-		public ILoggerFactory LoggerFactory { get; set; }
-
-		private static readonly AsyncLocal<Activity> holder = new AsyncLocal<Activity>();
-		private readonly bool goWithCallContext;
+		private static readonly AsyncLocal<Activity> _asyncLocalActivity = new AsyncLocal<Activity>();
 
 		public AsyncLocalActivityManager()
 		{
-			//CallContext.LogicalSetData(Key, null);
-			// holder = new ThreadLocal<Activity>(CreateActivity);
-
-			if (!goWithCallContext && holder.Value == null)
-			{
-				holder.Value = CreateActivity();
-			}
-
-			goWithCallContext = Convert.ToBoolean(ConfigurationManager.AppSettings["castle.tx.callcontext"]);
+			_asyncLocalActivity.Value = null;
 		}
 
 		public Activity GetCurrentActivity()
 		{
-			return goWithCallContext ? GetFromCallContext() : SafeGetFromAsyncLocal();
-		}
-
-		private Activity SafeGetFromAsyncLocal()
-		{
-			var cur = holder.Value;
-			if (cur == null)
-			{
-				holder.Value = cur = CreateActivity();
-			}
-			return cur;
-		}
-
-		private Activity GetFromCallContext()
-		{
-			var activity = (Activity)CallContext.GetData(Key);
+			var activity = _asyncLocalActivity.Value;
 
 			if (activity == null)
 			{
-				activity = CreateActivity();
-
-				// set activity in call context
-				CallContext.SetData(Key, activity);
+				activity = new Activity(NullLogger.Instance);
+				_asyncLocalActivity.Value = activity;
 			}
 
 			return activity;
 		}
 
-		private Activity CreateActivity()
+		public Activity CreateNewActivity()
 		{
-			ILogger logger = NullLogger.Instance;
-
-			// check we have a ILoggerFactory service instance (logging is enabled)
-			if (LoggerFactory != null) // create logger
-				logger = LoggerFactory.Create(typeof(Activity));
-			// create activity
-			var activity = new Activity(logger);
+			var activity = new Activity(NullLogger.Instance);
+			_asyncLocalActivity.Value = activity;
 			return activity;
 		}
 	}

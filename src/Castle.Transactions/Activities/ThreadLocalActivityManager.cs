@@ -1,4 +1,4 @@
-﻿// Copyright 2004-2011 Castle Project - http://www.castleproject.org/
+﻿// Copyright 2004-2012 Castle Project, Henrik Feldt &contributors - https://github.com/castleproject
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,66 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Castle.Services.Transaction.Activities
-{
-	using System;
-	using System.Configuration;
-	using System.Runtime.Remoting.Messaging;
-	using System.Threading;
-	using Castle.Core.Logging;
+using System.Threading;
+using Castle.Core.Logging;
 
+namespace Castle.Transactions.Activities
+{
 	/// <summary>
-	/// 	The call-context activity manager saves the stack of transactions
-	/// 	on the call-stack-context. This is the recommended manager and the default,
-	/// 	also.
+	///   The ThreadLocal activity manager saves the stack of transactions in thread local variable.
 	/// </summary>
 	public class ThreadLocalActivityManager : IActivityManager
 	{
-		private const string Key = "Castle.Services.Transaction.Activity";
-
-		public ILoggerFactory LoggerFactory { get; set; }
-
-		private readonly ThreadLocal<Activity> holder;
-		private readonly bool goWithCallContext;
+		private static readonly ThreadLocal<Activity> _threadLocalActivity = new ThreadLocal<Activity>();
 
 		public ThreadLocalActivityManager()
 		{
-			//CallContext.LogicalSetData(Key, null);
-
-			holder = new ThreadLocal<Activity>(CreateActivity);
-
-			goWithCallContext = Convert.ToBoolean(ConfigurationManager.AppSettings["castle.tx.callcontext"]);
+			_threadLocalActivity.Value = null;
 		}
 
 		public Activity GetCurrentActivity()
 		{
-			return goWithCallContext ? GetFromCallContext() : holder.Value;
-		}
-
-		private Activity GetFromCallContext()
-		{
-			var activity = (Activity) CallContext.GetData(Key);
+			var activity = _threadLocalActivity.Value;
 
 			if (activity == null)
 			{
-				activity = CreateActivity();
-
-				// set activity in call context
-				CallContext.SetData(Key, activity);
+				activity = new Activity(NullLogger.Instance);
+				_threadLocalActivity.Value = activity;
 			}
 
 			return activity;
 		}
 
-		private Activity CreateActivity()
+		public Activity CreateNewActivity()
 		{
-			ILogger logger = NullLogger.Instance;
-
-			// check we have a ILoggerFactory service instance (logging is enabled)
-			if (LoggerFactory != null) // create logger
-				logger = LoggerFactory.Create(typeof (Activity));
-			// create activity
-			var activity = new Activity(logger);
+			var activity = new Activity(NullLogger.Instance);
+			_threadLocalActivity.Value = activity;
 			return activity;
 		}
 	}
