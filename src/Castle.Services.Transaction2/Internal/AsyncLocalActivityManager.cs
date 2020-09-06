@@ -1,6 +1,7 @@
 namespace Castle.Services.Transaction.Internal
 {
 	using System;
+	using System.Collections.Concurrent;
 	using System.Threading;
 	using Core.Logging;
 
@@ -13,7 +14,7 @@ namespace Castle.Services.Transaction.Internal
 
 		public AsyncLocalActivityManager()
 		{
-			_holder = new AsyncLocal<Activity2>(OnValueChanged);
+			_holder = new AsyncLocal<Activity2>( /*OnValueChanged*/ );
 		}
 		
 		// Invoked by the activy itself after popping a transaction
@@ -33,10 +34,10 @@ namespace Castle.Services.Transaction.Internal
 			}
 		}
 
-		private void OnValueChanged(AsyncLocalValueChangedArgs<Activity2> args)
-		{
-			// Console.WriteLine("OnValueChanged from " + args.PreviousValue + " to " + args.CurrentValue + "  ctx_switch: " + args.ThreadContextChanged);
-		}
+//		private void OnValueChanged(AsyncLocalValueChangedArgs<Activity2> args)
+//		{
+//			// Console.WriteLine("OnValueChanged from " + args.PreviousValue + " to " + args.CurrentValue + "  ctx_switch: " + args.ThreadContextChanged);
+//		}
 
 		public ILogger Logger
 		{
@@ -51,6 +52,7 @@ namespace Castle.Services.Transaction.Internal
 			{
 				_holder.Value = cur = CreateActivity();
 			}
+			if (cur.IsDisposed) throw new Exception(cur + " already disposed [" + Thread.CurrentThread.ManagedThreadId + "_" + Thread.CurrentThread.Name + "]");
 			return cur;
 		}
 
@@ -67,7 +69,7 @@ namespace Castle.Services.Transaction.Internal
 		private Activity2 CreateActivity()
 		{
 			var id = Interlocked.Increment(ref _counter);
-			return new Activity2(this, id, _logger.CreateChildLogger("Activity." + id));
+			return new Activity2(this, id, _logger.CreateChildLogger("Activity"));
 		}
 	}
 }

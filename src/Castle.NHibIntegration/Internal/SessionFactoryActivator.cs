@@ -1,4 +1,4 @@
-﻿namespace Castle.NHibIntegration
+namespace Castle.NHibIntegration
 {
 	using System.Configuration;
 	using Core;

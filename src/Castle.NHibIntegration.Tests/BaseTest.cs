@@ -1,5 +1,3 @@
-using Oracle.ManagedDataAccess.Client;
-
 namespace Castle.NHibIntegration.Tests
 {
 	using System;
@@ -10,6 +8,7 @@ namespace Castle.NHibIntegration.Tests
 	using MicroKernel.Registration;
 	using NHibernate;
 	using NUnit.Framework;
+	using Oracle.ManagedDataAccess.Client;
 	using Services.Transaction.Facility;
 	using Windsor;
 
@@ -28,7 +27,9 @@ namespace Castle.NHibIntegration.Tests
 
 			_container.Register(
 				Component.For<SvcWithTransactions>(),
-				Component.For<SvcWithoutTransactions>()
+				Component.For<SvcWithoutTransactions>(),
+				Component.For<SvcAutoWithoutTransactions>(),
+				Component.For<SvcAutoWithTransactions>()
 			);
 
 			_sessionStore = _container.Resolve<ISessionStore>();
