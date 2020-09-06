@@ -46,7 +46,9 @@ namespace Castle.NHibIntegration.Tests
 
 			var configuration = Fluently
 				.Configure()
-				.ProxyFactoryFactory<NHibernate.ByteCode.Castle.ProxyFactoryFactory>()
+				// não precisa mais do proxyFactory
+				//https://stackoverflow.com/questions/38204002/getting-nhibernate-bytecode-proxyfactoryfactorynotconfiguredexception
+				//.ProxyFactoryFactory<NHibernate.ByteCode.Castle.ProxyFactoryFactory>()
 				.Database(dbConfig)
 //				.Cache(ConfigureCache)
 				.Mappings(ConfigureMappings)
@@ -87,7 +89,9 @@ namespace Castle.NHibIntegration.Tests
 
 			var configuration = Fluently
 				.Configure()
-				.ProxyFactoryFactory<NHibernate.ByteCode.Castle.ProxyFactoryFactory>()
+				// não precisa mais do proxyFactory
+				//https://stackoverflow.com/questions/38204002/getting-nhibernate-bytecode-proxyfactoryfactorynotconfiguredexception
+				//.ProxyFactoryFactory<NHibernate.ByteCode.Castle.ProxyFactoryFactory>()
 				.Database(dbConfig)
 				// .Cache(ConfigureCache)
 				.Mappings(ConfigureMappings)

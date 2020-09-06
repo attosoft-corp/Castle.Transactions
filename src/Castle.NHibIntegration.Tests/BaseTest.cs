@@ -1,3 +1,5 @@
+using Oracle.ManagedDataAccess.Client;
+
 namespace Castle.NHibIntegration.Tests
 {
 	using System;
@@ -8,7 +10,6 @@ namespace Castle.NHibIntegration.Tests
 	using MicroKernel.Registration;
 	using NHibernate;
 	using NUnit.Framework;
-	using Oracle.DataAccess.Client;
 	using Services.Transaction.Facility;
 	using Windsor;
 
